@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Stereo_To_Surround_Audio_Player</string>
+    <declare-styleable name="BaseVisualizer">
+        <attr name="avDensity" format="float"/>
+        <attr name="avColor" format="color"/>
+        <attr name="avType" format="string"/>
+        <attr name="avGravity" format="string"/>
+        <attr name="avWidth" format="dimension"/>
+        <attr name="avSpeed" format="string"/>
+    </declare-styleable>
+</resources>
