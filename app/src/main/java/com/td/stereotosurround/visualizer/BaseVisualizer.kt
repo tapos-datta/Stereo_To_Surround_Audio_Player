@@ -17,7 +17,7 @@ abstract class BaseVisualizer(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    protected var audioBuffer: FloatArray? = null
+    protected var audioBuffer = emptyArray<Float>().toFloatArray()
     protected var mPaint: Paint? = null
     protected var mColor: Int = Constants.DEFAULT_COLOR
 
@@ -91,7 +91,8 @@ abstract class BaseVisualizer(
 
     open fun setPaintStyle(paintStyle: PaintStyle) {
         this.mPaintStyle = paintStyle
-        this.mPaint!!.style = if (paintStyle === PaintStyle.FILL) Paint.Style.FILL else Paint.Style.STROKE
+        this.mPaint!!.style =
+            if (paintStyle === PaintStyle.FILL) Paint.Style.FILL else Paint.Style.STROKE
     }
 
     open fun setPositionGravity(positionGravity: PositionGravity) {

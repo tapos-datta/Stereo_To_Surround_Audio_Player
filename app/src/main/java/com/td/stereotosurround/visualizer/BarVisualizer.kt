@@ -21,15 +21,13 @@ class BarVisualizer : BaseVisualizer {
 
     private var nPoints = 0
 
-    private var mSrcY: FloatArray? = null
-    private var mDestY: FloatArray? = null
+    private lateinit var mSrcY: FloatArray
+    private lateinit var mDestY: FloatArray
+    private lateinit var mClipBounds: Rect
+    private lateinit var mRandom: Random
 
     private var mBarWidth = 0f
-    private var mClipBounds: Rect? = null
-
     private var nBatchCount = 0
-
-    private var mRandom: Random? = null
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -58,7 +56,7 @@ class BarVisualizer : BaseVisualizer {
 
     override fun update(data: FloatArray) {
         if (data.isEmpty()) return
-        audioBuffer = FloatArray(data.size)
+        audioBuffer = Array(data.size) { 0.0f }.toFloatArray()
         System.arraycopy(data, 0, audioBuffer, 0, data.lastIndex)
         invalidate()
     }
@@ -68,44 +66,40 @@ class BarVisualizer : BaseVisualizer {
             canvas.getClipBounds(mClipBounds)
             mBarWidth = (width / nPoints).toFloat()
             //initialize points
-            mSrcY!!.let {
+            mSrcY.let {
                 for (i in it.indices) {
                     val posY: Float =
                         if (mPositionGravity === PositionGravity.TOP) {
-                            mClipBounds!!.top.toFloat()
+                            mClipBounds.top.toFloat()
                         } else {
-                            mClipBounds!!.bottom.toFloat()
+                            mClipBounds.bottom.toFloat()
                         }
                     it[i] = posY
-                    mDestY!![i] = posY
+                    mDestY[i] = posY
                 }
             }
         }
 
         //create the path and draw
-        audioBuffer?.run {
+        if (audioBuffer.isNotEmpty()) {
             if (isVisualizationEnabled) {
-                if (audioBuffer!!.isEmpty()) {
-                    return@run
-                }
-
                 //find the destination points for a batch
                 if (nBatchCount == 0) {
-                    for (i in mSrcY!!.indices) {
-                        val x = audioBuffer!!.let {
+                    for (i in mSrcY.indices) {
+                        val x = audioBuffer.let {
                             val ind = ceil(((i + 1) * (it.size / nPoints)).toDouble())
                                 .toInt()
                             if (ind >= it.size) it.size - 1 else ind
                         }
-                        val t = (audioBuffer!![x] * height).toInt()
+                        val t = (audioBuffer[x] * height).toInt()
                         val posY: Float =
                             if (mPositionGravity === PositionGravity.TOP)
-                                mClipBounds!!.bottom.toFloat() - t
-                            else mClipBounds!!.top.toFloat() + t
+                                mClipBounds.bottom.toFloat() - t
+                            else mClipBounds.top.toFloat() + t
 
                         //change the source and destination y
-                        mSrcY!![i] = mDestY!![i]
-                        mDestY!![i] = posY
+                        mSrcY[i] = mDestY[i]
+                        mDestY[i] = posY
                     }
                 }
 
@@ -113,9 +107,9 @@ class BarVisualizer : BaseVisualizer {
                 nBatchCount++
 
                 //calculate bar position and draw
-                for (i in mSrcY!!.indices) {
+                for (i in mSrcY.indices) {
                     val barY: Float =
-                        mSrcY!![i] + nBatchCount.toFloat() / mMaxBatchCount * (mDestY!![i] - mSrcY!![i])
+                        mSrcY[i] + nBatchCount.toFloat() / mMaxBatchCount * (mDestY[i] - mSrcY[i])
                     val barX = i * mBarWidth + mBarWidth / 2
                     canvas.drawLine(barX, height.toFloat(), barX, barY, mPaint!!)
                 }
